@@ -18,6 +18,14 @@ class Snake {
         document.addEventListener('keydown', (e) => this.handleKeyPress(e));
         document.getElementById('startBtn').addEventListener('click', () => this.startGame());
         document.getElementById('pauseBtn').addEventListener('click', () => this.togglePause());
+        document.getElementById('backBtn').addEventListener('click', () => {
+            // 如果游戏正在运行，先清除游戏循环
+            if (this.gameLoop) {
+                clearInterval(this.gameLoop);
+            }
+            // 返回到菜单页
+            window.location.href = '../menu/index.html';
+        });
     }
 
     handleKeyPress(e) {

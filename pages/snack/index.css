@@ -9,11 +9,41 @@ body {
     font-family: Arial, sans-serif;
 }
 
+.back-button {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    z-index: 1000;
+}
+
+.back-button:hover {
+    background: #45a049;
+    transform: translateX(-3px);
+    box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.2);
+}
+
+.back-button::before {
+    content: "←";
+    font-size: 18px;
+}
+
 .game-container {
     background: #2a2a2a;
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    margin-top: 40px;
 }
 
 .game-header {

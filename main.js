@@ -22,7 +22,7 @@ function createWindow() {
     })
     ipcMain.on('file-save', writeFile)
     ipcMain.handle('file-open', readFile)
-    win.loadFile('./pages/index.html')
+    win.loadFile('./pages/menu/index.html')
 }
 
 app.on('ready', () => {
