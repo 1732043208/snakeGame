@@ -13,8 +13,8 @@ function writeFile(_, data) {
 
 function createWindow() {
     const win = new BrowserWindow({
-        width: 1024,
-        height: 768,
+        width: 1280,
+        height: 960,
         autoHideMenuBar: true,
         webPreferences: {
             preload: path.resolve(__dirname, './preload.js')
