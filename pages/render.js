@@ -9,7 +9,7 @@ class Snake {
         this.score = 0;
         this.gameLoop = null;
         this.isPaused = false;
-        
+
         this.bindEvents();
         this.showStartScreen();
     }
@@ -45,8 +45,19 @@ class Snake {
     }
 
     generateFood() {
-        const x = Math.floor(Math.random() * (this.canvas.width / this.gridSize));
-        const y = Math.floor(Math.random() * (this.canvas.height / this.gridSize));
+        let x, y;
+        do {
+            x = Math.floor(Math.random() * (this.canvas.width / this.gridSize));
+            y = Math.floor(Math.random() * (this.canvas.height / this.gridSize));
+            // 检查新生成的位置是否与蛇身重叠
+            const isOnSnake = this.snake.some(segment =>
+                segment.x === x && segment.y === y
+            );
+            if (!isOnSnake) {
+                break;
+            }
+        } while (true);
+
         return {x, y};
     }
 
@@ -60,7 +71,7 @@ class Snake {
             const yPos = y * this.gridSize;
             const width = this.gridSize - 2;
             const height = this.gridSize - 2;
-            
+
             this.ctx.moveTo(xPos + radius, yPos);
             this.ctx.lineTo(xPos + width - radius, yPos);
             this.ctx.quadraticCurveTo(xPos + width, yPos, xPos + width, yPos + radius);
@@ -106,10 +117,18 @@ class Snake {
         const head = {...this.snake[0]};
 
         switch (this.direction) {
-            case 'up': head.y--; break;
-            case 'down': head.y++; break;
-            case 'left': head.x--; break;
-            case 'right': head.x++; break;
+            case 'up':
+                head.y--;
+                break;
+            case 'down':
+                head.y++;
+                break;
+            case 'left':
+                head.x--;
+                break;
+            case 'right':
+                head.x++;
+                break;
         }
 
         // 检查是否撞墙
@@ -158,7 +177,7 @@ class Snake {
         if (this.gameLoop) {
             clearInterval(this.gameLoop);
         }
-        
+
         // 重置游戏状态
         this.snake = [{x: 5, y: 5}];
         this.direction = 'right';
@@ -166,7 +185,7 @@ class Snake {
         document.getElementById('score').textContent = '0';
         this.food = this.generateFood();
         this.isPaused = false;
-        
+
         // 启动新的游戏循环
         this.gameLoop = setInterval(() => {
             if (!this.isPaused) {
@@ -174,7 +193,7 @@ class Snake {
                 this.draw();
             }
         }, 200);
-        
+
         // 更新按钮文本
         document.getElementById('pauseBtn').textContent = '暂停';
     }
@@ -189,7 +208,7 @@ class Snake {
         this.ctx.fillStyle = '#fff';
         this.ctx.font = '20px Arial';
         this.ctx.textAlign = 'center';
-        this.ctx.fillText('点击"开始游戏"按钮开始', this.canvas.width/2, this.canvas.height/2);
+        this.ctx.fillText('点击"开始游戏"按钮开始', this.canvas.width / 2, this.canvas.height / 2);
     }
 }
 
