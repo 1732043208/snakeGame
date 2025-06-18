@@ -6,8 +6,8 @@ class TankGame {
         
         // 创建玩家坦克
         this.player1 = new Tank({
-            x: 4 * 32,
-            y: 9 * 32,
+            x: 5 * 32,
+            y: 10 * 32,
             direction: 'up',
             color: '#4CAF50',
             controls: {
@@ -20,8 +20,8 @@ class TankGame {
         });
 
         this.player2 = new Tank({
-            x: 8 * 32,
-            y: 9 * 32,
+            x: 9 * 32,
+            y: 10 * 32,
             direction: 'up',
             color: '#2196F3',
             controls: {
@@ -39,12 +39,15 @@ class TankGame {
         this.totalEnemies = 20; // 总敌人数量
         this.enemiesDefeated = 0; // 已击败的敌人数量
         this.enemySpawnPoints = [
-            { x: 1 * 32, y: 1 * 32 },      // 左上角
-            { x: 6 * 32, y: 1 * 32 },      // 中上
-            { x: 11 * 32, y: 1 * 32 }      // 右上角
+            { x: 0, y: 0 },            // 左上角
+            { x: 7 * 32, y: 0 },       // 中上
+            { x: 14 * 32, y: 0 }       // 右上角
         ];
         this.enemySpawnDelay = 180; // 生成新敌人的延迟
         this.enemySpawnCounter = 0;
+
+        this.animationId = null;
+        this.isPaused = false;
 
         this.bindEvents();
         this.showStartScreen();
@@ -85,22 +88,82 @@ class TankGame {
         this.enemies.push(enemy);
     }
 
+    startGameLoop() {
+        const loop = () => {
+            if (!this.isPaused) {
+                this.update();
+                this.draw();
+            }
+            this.animationId = requestAnimationFrame(loop);
+        };
+        loop();
+    }
+
+    startGame() {
+        if (this.animationId) {
+            cancelAnimationFrame(this.animationId);
+        }
+        
+        // 重置游戏状态
+        this.enemies = [];
+        this.enemiesDefeated = 0;
+        this.enemySpawnCounter = 0;
+        this.isPaused = false;
+        
+        // 重置玩家位置
+        this.player1.x = 5 * 32;
+        this.player1.y = 10 * 32;
+        this.player2.x = 9 * 32;
+        this.player2.y = 10 * 32;
+
+        this.startGameLoop();
+    }
+
+    togglePause() {
+        this.isPaused = !this.isPaused;
+        document.getElementById('pauseBtn').textContent = this.isPaused ? '继续' : '暂停';
+    }
+
+    showStartScreen() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.fillStyle = '#fff';
+        this.ctx.font = '20px Arial';
+        this.ctx.textAlign = 'center';
+        this.ctx.fillText('点击"开始游戏"按钮开始', this.canvas.width / 2, this.canvas.height / 2);
+    }
+
+    showGameOver() {
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.fillStyle = '#fff';
+        this.ctx.font = '48px Arial';
+        this.ctx.textAlign = 'center';
+        this.ctx.fillText('游戏结束', this.canvas.width / 2, this.canvas.height / 2);
+
+        const message = this.enemiesDefeated >= this.totalEnemies ? 
+            '胜利！' : '游戏结束';
+        this.ctx.fillText(message, this.canvas.width / 2, this.canvas.height / 2);
+    }
+
     update() {
         if (this.isPaused) return;
 
-        // 玩家1控制
-        if (this.keyStates['w']) this.player1.move('up', this.gameMap);
-        if (this.keyStates['s']) this.player1.move('down', this.gameMap);
-        if (this.keyStates['a']) this.player1.move('left', this.gameMap);
-        if (this.keyStates['d']) this.player1.move('right', this.gameMap);
-        if (this.keyStates[' ']) this.player1.shoot();
+        // 更新玩家控制
+        if (this.keyStates) {
+            // 玩家1控制
+            if (this.keyStates['w']) this.player1.move('up', this.gameMap);
+            if (this.keyStates['s']) this.player1.move('down', this.gameMap);
+            if (this.keyStates['a']) this.player1.move('left', this.gameMap);
+            if (this.keyStates['d']) this.player1.move('right', this.gameMap);
+            if (this.keyStates[' ']) this.player1.shoot();
 
-        // 玩家2控制
-        if (this.keyStates['ArrowUp']) this.player2.move('up', this.gameMap);
-        if (this.keyStates['ArrowDown']) this.player2.move('down', this.gameMap);
-        if (this.keyStates['ArrowLeft']) this.player2.move('left', this.gameMap);
-        if (this.keyStates['ArrowRight']) this.player2.move('right', this.gameMap);
-        if (this.keyStates['Enter']) this.player2.shoot();
+            // 玩家2控制
+            if (this.keyStates['ArrowUp']) this.player2.move('up', this.gameMap);
+            if (this.keyStates['ArrowDown']) this.player2.move('down', this.gameMap);
+            if (this.keyStates['ArrowLeft']) this.player2.move('left', this.gameMap);
+            if (this.keyStates['ArrowRight']) this.player2.move('right', this.gameMap);
+            if (this.keyStates['Enter']) this.player2.shoot();
+        }
 
         // 更新敌人生成
         this.enemySpawnCounter++;
@@ -166,10 +229,20 @@ class TankGame {
         // 绘制敌人
         this.enemies.forEach(enemy => enemy.draw(this.ctx));
         
-        // 绘制剩余敌人数量
-        this.ctx.fillStyle = '#fff';
-        this.ctx.font = '16px Arial';
-        this.ctx.fillText(`敌人剩余: ${this.totalEnemies - this.enemiesDefeated}`, 10, 20);
+        // 优化剩余敌人显示
+        this.ctx.fillStyle = '#4CAF50';
+        this.ctx.font = 'bold 20px Arial';
+        this.ctx.textAlign = 'left';
+        this.ctx.shadowColor = '#000';
+        this.ctx.shadowBlur = 4;
+        this.ctx.shadowOffsetX = 2;
+        this.ctx.shadowOffsetY = 2;
+        this.ctx.fillText(`剩余敌人: ${this.totalEnemies - this.enemiesDefeated}`, 10, 30);
+        
+        // 清除阴影效果，避免影响其他绘制
+        this.ctx.shadowBlur = 0;
+        this.ctx.shadowOffsetX = 0;
+        this.ctx.shadowOffsetY = 0;
     }
 
     gameLoop() {
@@ -182,41 +255,6 @@ class TankGame {
         }
 
         this.animationId = requestAnimationFrame(() => this.gameLoop());
-    }
-
-    startGame() {
-        if (this.animationId) {
-            cancelAnimationFrame(this.animationId);
-        }
-        window.gameOver = false;
-        this.isPaused = false;
-        this.gameLoop();
-    }
-
-    togglePause() {
-        this.isPaused = !this.isPaused;
-        document.getElementById('pauseBtn').textContent = this.isPaused ? '继续' : '暂停';
-    }
-
-    showStartScreen() {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.ctx.fillStyle = '#fff';
-        this.ctx.font = '20px Arial';
-        this.ctx.textAlign = 'center';
-        this.ctx.fillText('点击"开始游戏"按钮开始', this.canvas.width / 2, this.canvas.height / 2);
-    }
-
-    showGameOver() {
-        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        this.ctx.fillStyle = '#fff';
-        this.ctx.font = '48px Arial';
-        this.ctx.textAlign = 'center';
-        this.ctx.fillText('游戏结束', this.canvas.width / 2, this.canvas.height / 2);
-
-        const message = this.enemiesDefeated >= this.totalEnemies ? 
-            '胜利！' : '游戏结束';
-        this.ctx.fillText(message, this.canvas.width / 2, this.canvas.height / 2);
     }
 }
 

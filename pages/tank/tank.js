@@ -89,6 +89,15 @@ class Tank {
     }
 
     canMove(newX, newY, gameMap) {
+        // 检查地图边界
+        if (newX < 0 || 
+            newX + this.size > gameMap.map[0].length * gameMap.tileSize || 
+            newY < 0 || 
+            newY + this.size > gameMap.map.length * gameMap.tileSize) {
+            return false;
+        }
+
+        // 检查碰撞
         const gridX = Math.floor(newX / gameMap.tileSize);
         const gridY = Math.floor(newY / gameMap.tileSize);
         const gridX2 = Math.floor((newX + this.size - 1) / gameMap.tileSize);
