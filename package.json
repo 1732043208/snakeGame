@@ -24,14 +24,20 @@
     "nsis": {
       "oneClick": false,
       "perMachine": true,
-      "allowToChangeInstallationDirectory": true
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Joker的贪吃蛇",
+      "allowElevation": true,
+      "runAfterFinish": true,
+      "deleteAppDataOnUninstall": true
     }
   },
   "author": "Joker",
   "license": "ISC",
   "description": "自己做的一个贪吃蛇小游戏",
   "devDependencies": {
-    "electron": "31.0.2",
+    "electron": "^19.1.9",
     "electron-builder": "^26.0.12",
     "nodemon": "^3.1.10"
   }
