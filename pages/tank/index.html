@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>坦克大战</title>
+    <link rel="stylesheet" href="./index.css">
+</head>
+<body>
+    <button id="backBtn" class="back-button">返回菜单</button>
+    <div class="game-container">
+        <div class="game-header">
+            <h1>Joker的坦克大战</h1>
+        </div>
+        <canvas id="gameCanvas" width="416" height="352"></canvas>
+        <div class="game-controls">
+            <button id="startBtn">开始游戏</button>
+            <button id="pauseBtn">暂停</button>
+        </div>
+        <div class="game-instructions">
+            <p>玩家1：WASD控制移动，空格键发射</p>
+            <p>玩家2：方向键控制移动，回车键发射</p>
+        </div>
+    </div>
+    <script src="./map.js"></script>
+    <script src="./bullet.js"></script>
+    <script src="./tank.js"></script>
+    <script src="./render.js"></script>
+</body>
+</html>
