@@ -50,14 +50,37 @@ class Snake {
         return {x, y};
     }
 
-    drawSquare(x, y, color) {
+    drawSquare(x, y, color, isHead = false) {
         this.ctx.fillStyle = color;
-        this.ctx.fillRect(
-            x * this.gridSize,
-            y * this.gridSize,
-            this.gridSize - 2,
-            this.gridSize - 2
-        );
+        if (isHead) {
+            // 为蛇头绘制圆角矩形
+            this.ctx.beginPath();
+            const radius = 4; // 圆角半径
+            const xPos = x * this.gridSize;
+            const yPos = y * this.gridSize;
+            const width = this.gridSize - 2;
+            const height = this.gridSize - 2;
+            
+            this.ctx.moveTo(xPos + radius, yPos);
+            this.ctx.lineTo(xPos + width - radius, yPos);
+            this.ctx.quadraticCurveTo(xPos + width, yPos, xPos + width, yPos + radius);
+            this.ctx.lineTo(xPos + width, yPos + height - radius);
+            this.ctx.quadraticCurveTo(xPos + width, yPos + height, xPos + width - radius, yPos + height);
+            this.ctx.lineTo(xPos + radius, yPos + height);
+            this.ctx.quadraticCurveTo(xPos, yPos + height, xPos, yPos + height - radius);
+            this.ctx.lineTo(xPos, yPos + radius);
+            this.ctx.quadraticCurveTo(xPos, yPos, xPos + radius, yPos);
+            this.ctx.closePath();
+            this.ctx.fill();
+        } else {
+            // 蛇身体保持矩形
+            this.ctx.fillRect(
+                x * this.gridSize,
+                y * this.gridSize,
+                this.gridSize - 2,
+                this.gridSize - 2
+            );
+        }
     }
 
     draw() {
@@ -66,8 +89,13 @@ class Snake {
 
         // 绘制蛇
         this.snake.forEach((segment, i) => {
-            const color = i === 0 ? '#4CAF50' : '#45a049';
-            this.drawSquare(segment.x, segment.y, color);
+            if (i === 0) {
+                // 蛇头使用浅绿色
+                this.drawSquare(segment.x, segment.y, '#90EE90', true);
+            } else {
+                // 蛇身使用深绿色
+                this.drawSquare(segment.x, segment.y, '#54b954', false);
+            }
         });
 
         // 绘制食物
@@ -145,7 +173,7 @@ class Snake {
                 this.move();
                 this.draw();
             }
-        }, 150);
+        }, 200);
         
         // 更新按钮文本
         document.getElementById('pauseBtn').textContent = '暂停';
