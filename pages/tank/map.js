@@ -24,9 +24,9 @@ class GameMap {
     }
 
     loadSprites() {
-        this.sprites.wall.src = '../assets/wall.png';
-        this.sprites.steel.src = '../assets/steel.png';
-        this.sprites.base.src = '../assets/base.png';
+        this.sprites.wall.src = './public/map/wall.png';
+        this.sprites.steel.src = './public/map/ice.png';
+        this.sprites.base.src = './public/map/camp.png';
     }
 
     draw(ctx) {

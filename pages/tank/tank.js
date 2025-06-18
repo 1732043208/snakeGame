@@ -10,11 +10,31 @@ class Tank {
         this.bullets = [];
         this.cooldown = 0;
         this.maxCooldown = 20;
-        this.sprite = document.createElement('img');
-        this.sprite.src = config.spriteSrc;
-        this.spriteLoaded = false;
-        this.sprite.onload = () => this.spriteLoaded = true;
-        this.sprite.onerror = () => console.error('坦克图片加载失败:', config.spriteSrc);
+        this.sprites = {};
+        this.currentFrame = 0;
+        this.frameCount = 2;
+        this.frameDelay = 5;
+        this.frameTimer = 0;
+        this.loadSprites();
+    }
+
+    loadSprites() {
+        // 加载对应方向的坦克图片
+        const directions = ['0', '1', '2', '3']; // 对应上右下左
+        const playerType = this.controls.up === 'w' ? 'p1' : 'p2'; // 判断是玩家1还是玩家2
+        
+        directions.forEach(dir => {
+            this.sprites[dir] = [
+                this.loadImage(`./public/player/${playerType}/${playerType}_${dir}_0.png`),
+                this.loadImage(`./public/player/${playerType}/${playerType}_${dir}_1.png`)
+            ];
+        });
+    }
+
+    loadImage(src) {
+        const img = new Image();
+        img.src = src;
+        return img;
     }
 
     update(gameMap) {
@@ -90,22 +110,32 @@ class Tank {
 
     draw(ctx) {
         ctx.save();
-        ctx.translate(this.x + this.size / 2, this.y + this.size / 2);
         
+        // 更新动画帧
+        this.frameTimer++;
+        if (this.frameTimer >= this.frameDelay) {
+            this.currentFrame = (this.currentFrame + 1) % this.frameCount;
+            this.frameTimer = 0;
+        }
+
+        // 获取当前方向的图片数组
+        let dirIndex;
         switch (this.direction) {
-            case 'up': ctx.rotate(0); break;
-            case 'right': ctx.rotate(Math.PI / 2); break;
-            case 'down': ctx.rotate(Math.PI); break;
-            case 'left': ctx.rotate(-Math.PI / 2); break;
+            case 'up': dirIndex = '0'; break;
+            case 'right': dirIndex = '1'; break;
+            case 'down': dirIndex = '2'; break;
+            case 'left': dirIndex = '3'; break;
         }
-        
-        if (this.spriteLoaded) {
-            ctx.drawImage(this.sprite, -this.size / 2, -this.size / 2, this.size, this.size);
+
+        const sprite = this.sprites[dirIndex][this.currentFrame];
+        if (sprite && sprite.complete) {
+            ctx.drawImage(sprite, this.x, this.y, this.size, this.size);
         } else {
-            // 如果图片未加载，使用颜色块代替
+            // 如果图片未加载完成，使用颜色块代替
             ctx.fillStyle = this.color;
-            ctx.fillRect(-this.size / 2, -this.size / 2, this.size, this.size);
+            ctx.fillRect(this.x, this.y, this.size, this.size);
         }
+
         ctx.restore();
 
         // 绘制子弹

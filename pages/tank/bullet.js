@@ -4,7 +4,9 @@ class Bullet {
         this.y = y;
         this.direction = direction;
         this.speed = 8;
-        this.size = 4;
+        this.size = 6;
+        this.sprite = new Image();
+        this.sprite.src = './public/bullet/bullet.png';
     }
 
     update() {
@@ -17,9 +19,14 @@ class Bullet {
     }
 
     draw(ctx) {
-        ctx.fillStyle = '#FFD700';
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fill();
+        if (this.sprite.complete) {
+            ctx.drawImage(this.sprite, this.x - this.size/2, this.y - this.size/2, this.size, this.size);
+        } else {
+            // 后备渲染
+            ctx.fillStyle = '#FFD700';
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size/2, 0, Math.PI * 2);
+            ctx.fill();
+        }
     }
 }

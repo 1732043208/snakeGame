@@ -10,7 +10,6 @@ class TankGame {
             y: 9 * 32,
             direction: 'up',
             color: '#4CAF50',
-            spriteSrc: '../assets/tank1.png',
             controls: {
                 up: 'w',
                 down: 's',
@@ -25,7 +24,6 @@ class TankGame {
             y: 9 * 32,
             direction: 'up',
             color: '#2196F3',
-            spriteSrc: '../assets/tank2.png',
             controls: {
                 up: 'ArrowUp',
                 down: 'ArrowDown',
