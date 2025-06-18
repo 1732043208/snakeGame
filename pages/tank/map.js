@@ -38,16 +38,28 @@ class GameMap {
 
                 switch (tile) {
                     case 1: // 普通墙
-                        ctx.fillStyle = '#8B4513';
-                        ctx.fillRect(xPos, yPos, this.tileSize, this.tileSize);
+                        if (this.sprites.wall.complete) {
+                            ctx.drawImage(this.sprites.wall, xPos, yPos, this.tileSize, this.tileSize);
+                        } else {
+                            ctx.fillStyle = '#8B4513';
+                            ctx.fillRect(xPos, yPos, this.tileSize, this.tileSize);
+                        }
                         break;
                     case 2: // 钢墙
-                        ctx.fillStyle = '#808080';
-                        ctx.fillRect(xPos, yPos, this.tileSize, this.tileSize);
+                        if (this.sprites.steel.complete) {
+                            ctx.drawImage(this.sprites.steel, xPos, yPos, this.tileSize, this.tileSize);
+                        } else {
+                            ctx.fillStyle = '#808080';
+                            ctx.fillRect(xPos, yPos, this.tileSize, this.tileSize);
+                        }
                         break;
                     case 3: // 基地
-                        ctx.fillStyle = '#FFD700';
-                        ctx.fillRect(xPos, yPos, this.tileSize, this.tileSize);
+                        if (this.sprites.base.complete) {
+                            ctx.drawImage(this.sprites.base, xPos, yPos, this.tileSize, this.tileSize);
+                        } else {
+                            ctx.fillStyle = '#FFD700';
+                            ctx.fillRect(xPos, yPos, this.tileSize, this.tileSize);
+                        }
                         break;
                 }
             }
