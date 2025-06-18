@@ -33,6 +33,19 @@ class TankGame {
             }
         });
 
+        // 添加敌人坦克数组和相关配置
+        this.enemies = [];
+        this.maxEnemies = 4; // 场上最大敌人数量
+        this.totalEnemies = 20; // 总敌人数量
+        this.enemiesDefeated = 0; // 已击败的敌人数量
+        this.enemySpawnPoints = [
+            { x: 1 * 32, y: 1 * 32 },      // 左上角
+            { x: 6 * 32, y: 1 * 32 },      // 中上
+            { x: 11 * 32, y: 1 * 32 }      // 右上角
+        ];
+        this.enemySpawnDelay = 180; // 生成新敌人的延迟
+        this.enemySpawnCounter = 0;
+
         this.bindEvents();
         this.showStartScreen();
     }
@@ -53,6 +66,25 @@ class TankGame {
         document.addEventListener('keyup', (e) => this.keyStates[e.key] = false);
     }
 
+    spawnEnemy() {
+        if (this.enemies.length >= this.maxEnemies || 
+            this.enemiesDefeated >= this.totalEnemies) return;
+
+        const spawnPoint = this.enemySpawnPoints[
+            Math.floor(Math.random() * this.enemySpawnPoints.length)
+        ];
+
+        const enemy = new EnemyTank({
+            x: spawnPoint.x,
+            y: spawnPoint.y,
+            direction: 'down',
+            color: '#ff0000',
+            level: Math.floor(Math.random() * 4) // 随机等级 0-3
+        });
+
+        this.enemies.push(enemy);
+    }
+
     update() {
         if (this.isPaused) return;
 
@@ -70,8 +102,59 @@ class TankGame {
         if (this.keyStates['ArrowRight']) this.player2.move('right', this.gameMap);
         if (this.keyStates['Enter']) this.player2.shoot();
 
+        // 更新敌人生成
+        this.enemySpawnCounter++;
+        if (this.enemySpawnCounter >= this.enemySpawnDelay) {
+            this.enemySpawnCounter = 0;
+            this.spawnEnemy();
+        }
+
+        // 更新敌人
+        this.enemies.forEach(enemy => {
+            enemy.updateAI(this.gameMap, [this.player1, this.player2]);
+            enemy.update(this.gameMap);
+        });
+
+        // 检查子弹碰撞
+        this.checkBulletCollisions();
+
         this.player1.update(this.gameMap);
         this.player2.update(this.gameMap);
+    }
+
+    checkBulletCollisions() {
+        // 检查玩家子弹是否击中敌人
+        [this.player1, this.player2].forEach(player => {
+            player.bullets.forEach((bullet, bulletIndex) => {
+                this.enemies.forEach((enemy, enemyIndex) => {
+                    if (this.checkCollision(bullet, enemy)) {
+                        player.bullets.splice(bulletIndex, 1);
+                        this.enemies.splice(enemyIndex, 1);
+                        this.enemiesDefeated++;
+                        // TODO: 添加爆炸效果
+                    }
+                });
+            });
+        });
+
+        // 检查敌人子弹是否击中玩家
+        this.enemies.forEach(enemy => {
+            enemy.bullets.forEach((bullet, bulletIndex) => {
+                [this.player1, this.player2].forEach(player => {
+                    if (this.checkCollision(bullet, player)) {
+                        enemy.bullets.splice(bulletIndex, 1);
+                        // TODO: 玩家死亡逻辑
+                    }
+                });
+            });
+        });
+    }
+
+    checkCollision(bullet, tank) {
+        return bullet.x >= tank.x && 
+               bullet.x <= tank.x + tank.size &&
+               bullet.y >= tank.y && 
+               bullet.y <= tank.y + tank.size;
     }
 
     draw() {
@@ -79,6 +162,14 @@ class TankGame {
         this.gameMap.draw(this.ctx);
         this.player1.draw(this.ctx);
         this.player2.draw(this.ctx);
+
+        // 绘制敌人
+        this.enemies.forEach(enemy => enemy.draw(this.ctx));
+        
+        // 绘制剩余敌人数量
+        this.ctx.fillStyle = '#fff';
+        this.ctx.font = '16px Arial';
+        this.ctx.fillText(`敌人剩余: ${this.totalEnemies - this.enemiesDefeated}`, 10, 20);
     }
 
     gameLoop() {
@@ -122,6 +213,10 @@ class TankGame {
         this.ctx.font = '48px Arial';
         this.ctx.textAlign = 'center';
         this.ctx.fillText('游戏结束', this.canvas.width / 2, this.canvas.height / 2);
+
+        const message = this.enemiesDefeated >= this.totalEnemies ? 
+            '胜利！' : '游戏结束';
+        this.ctx.fillText(message, this.canvas.width / 2, this.canvas.height / 2);
     }
 }
 
