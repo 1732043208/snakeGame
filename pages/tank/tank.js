@@ -10,25 +10,26 @@ class Tank {
         this.bullets = [];
         this.cooldown = 0;
         this.maxCooldown = 20;
-        this.sprites = {};
+        
+        // 添加动画相关的变量初始化
         this.currentFrame = 0;
         this.frameCount = 2;
         this.frameDelay = 5;
         this.frameTimer = 0;
+        
+        // 加载精灵图
+        this.level = 0; // 坦克等级，默认为0
+        this.sprites = [];
         this.loadSprites();
     }
 
     loadSprites() {
-        // 加载对应方向的坦克图片
-        const directions = ['0', '1', '2', '3']; // 对应上右下左
-        const playerType = this.controls.up === 'w' ? 'p1' : 'p2'; // 判断是玩家1还是玩家2
-        
-        directions.forEach(dir => {
-            this.sprites[dir] = [
-                this.loadImage(`./public/player/${playerType}/${playerType}_${dir}_0.png`),
-                this.loadImage(`./public/player/${playerType}/${playerType}_${dir}_1.png`)
-            ];
-        });
+        const playerType = this.controls.up === 'w' ? 'p1' : 'p2';
+        // 加载坦克精灵图
+        this.sprites = [
+            this.loadImage(`./public/player/${playerType}/${playerType}_${this.level}_0.png`),
+            this.loadImage(`./public/player/${playerType}/${playerType}_${this.level}_1.png`)
+        ];
     }
 
     loadImage(src) {
@@ -118,22 +119,33 @@ class Tank {
             this.frameTimer = 0;
         }
 
-        // 获取当前方向的图片数组
-        let dirIndex;
+        // 计算旋转角度
+        let rotation = 0;
         switch (this.direction) {
-            case 'up': dirIndex = '0'; break;
-            case 'right': dirIndex = '1'; break;
-            case 'down': dirIndex = '2'; break;
-            case 'left': dirIndex = '3'; break;
+            case 'up': rotation = 0; break;
+            case 'right': rotation = 90; break;
+            case 'down': rotation = 180; break;
+            case 'left': rotation = 270; break;
         }
 
-        const sprite = this.sprites[dirIndex][this.currentFrame];
+        // 设置旋转中心点为坦克中心
+        ctx.translate(this.x + this.size / 2, this.y + this.size / 2);
+        ctx.rotate((rotation * Math.PI) / 180);
+        
+        const sprite = this.sprites[this.currentFrame];
         if (sprite && sprite.complete) {
-            ctx.drawImage(sprite, this.x, this.y, this.size, this.size);
+            // 绘制时需要将坐标原点移回坦克左上角
+            ctx.drawImage(
+                sprite, 
+                -this.size / 2, 
+                -this.size / 2, 
+                this.size, 
+                this.size
+            );
         } else {
-            // 如果图片未加载完成，使用颜色块代替
+            // 后备渲染
             ctx.fillStyle = this.color;
-            ctx.fillRect(this.x, this.y, this.size, this.size);
+            ctx.fillRect(-this.size / 2, -this.size / 2, this.size, this.size);
         }
 
         ctx.restore();
